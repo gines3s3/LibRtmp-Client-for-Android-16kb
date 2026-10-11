@@ -2,11 +2,11 @@ apply plugin: "com.android.library"
 
 
 android {
-    compileSdkVersion  29 // sdk level 21 lets ndk generate resources for archs such as arm64.
+    compileSdkVersion 34 // sdk level 21 lets ndk generate resources for archs such as arm64.
     defaultConfig {
         // applicationId "io.antmedia.rtmpclient"
         minSdkVersion 15
-        targetSdkVersion 29
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
