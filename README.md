@@ -1,37 +1,56 @@
-## CHANGE-FOR-FORK
+# LibRtmp-Client-for-Android-16kb
 
-[![](https://jitpack.io/v/mcxinyu/LibRtmp-Client-for-Android.svg)](https://jitpack.io/#mcxinyu/LibRtmp-Client-for-Android)
+[![](https://jitpack.io/v/gines3s3/LibRtmp-Client-for-Android-16kb.svg)](https://jitpack.io/#gines3s3/LibRtmp-Client-for-Android-16kb)
 
+Recompiled and configured with Android NDK r28 and flexible page size flags (`-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON`) to support [Android 16 KB Page Sizes](https://developer.android.com/guide/practices/page-sizes) and pass Google Play Store requirements.
 
-The configuration of target_link_libraries in [CMakeLists.txt](rtmp-client/CMakeLists.txt) has been modified to support the requirements of [Support 16 KB page sizes](https://developer.android.com/guide/practices/page-sizes).
+### Integration with `androidx.media3:media3-datasource-rtmp`
 
-### about androidx.media3:media3-datasource-rtmp
+AndroidX Media3 [RTMP DataSource module](https://github.com/androidx/media/tree/release/libraries/datasource_rtmp) depends on `io.antmedia:rtmp-client`, which uses an old NDK binary that fails Google Play 16 KB page size static checks.
 
-androidx.media3 [RTMP DataSource module](https://github.com/androidx/media/tree/release/libraries/datasource_rtmp) uses [the rtmp-client library](https://github.com/ant-media/LibRtmp-Client-for-Android), but the upstream developers have not updated it in time to support 16k, if you encounter [the same problem](https://github.com/androidx/media/issues/1918), you can try use this library first to solve the problem.
+You can resolve the Google Play Console 16 KB warning by excluding `rtmp-client` and adding this library:
 
-![Image](https://github.com/user-attachments/assets/f6b76cc5-e2b4-4157-83f7-f0f84e0a80b4)
-
+**Kotlin DSL (`build.gradle.kts`):**
 ```kts
-  implementation("androidx.media3:media3-datasource-rtmp:1.6.1") {
-    exclude("io.antmedia", "rtmp-client")
-  }
-  implementation("com.github.mcxinyu:LibRtmp-Client-for-Android:v3.2.0.m2")
+repositories {
+    mavenCentral()
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("androidx.media3:media3-datasource-rtmp:1.5.1") {
+        exclude("io.antmedia", "rtmp-client")
+    }
+    implementation("com.github.gines3s3:LibRtmp-Client-for-Android-16kb:v3.2.1-16kb")
+}
+```
+
+**Groovy (`build.gradle`):**
+```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation('androidx.media3:media3-datasource-rtmp:1.5.1') {
+        exclude group: 'io.antmedia', module: 'rtmp-client'
+    }
+    implementation 'com.github.gines3s3:LibRtmp-Client-for-Android-16kb:v3.2.1-16kb'
+}
 ```
 
 ---
 
 # Librtmp Client for Android
-It is probably the smallest(~60KB) rtmp client for android. It calls librtmp functions over JNI interface.
-With all cpu architectures(arm, arm7, arm8, x86, x86-64, mips) its size is getting about 300KB
+It is probably the smallest (~60KB) RTMP client for Android. It calls librtmp functions over JNI interface.
+With all CPU architectures (arm, arm7, arm8, x86, x86-64) its total size is around 300KB.
 
-It compiles librtmp library without ssl. 
-
-In version 0.2, it supports FLV muxing and sending stream via RTMP. FLV muxing is based on this repo https://github.com/rainfly123/flvmuxer
-
+It compiles the librtmp library without SSL.
 
 ##### To read streams, you can call below functions of **RtmpClient** from Java #####
 
-For live streams add **" live=1"** at the end of the url when calling the **_open_** function
+For live streams add **" live=1"** at the end of the URL when calling the **_open_** function:
 
 * *public native int open(String url, boolean isPublishMode);*
 * *public native int read(byte[] data, int offset, int size);*
@@ -39,40 +58,19 @@ For live streams add **" live=1"** at the end of the url when calling the **_ope
 * *public native int seek(int seekTime);*
 * *public native int pause(int pause);*
 * *public native int close();*
-* *public native int isConnected();*: Call this function to query the connection status. Returns 1 if connected, returns 0 if not connected
+* *public native int isConnected();*: Call this function to query the connection status. Returns 1 if connected, returns 0 if not connected.
 
-Don't forget calling the **_close_** function after you are done. If you don't, there will be memory leakage
+Don't forget to call the **_close_** function after you are done to avoid memory leaks.
 
 
 ##### To publish streams, you can call below functions of **RtmpMuxer** from Java #####
-* *public native int open(String url, int width, int height);* : First, call this function with the url you plan to publish. Width and height are the width and height of the video. These two parameters are not mandatory. They are optional. They put width and height values into the metadata tag.
-* *public native int writeVideo(byte[] data, int offset, int length, int timestamp);*: Write h264 nal units with this function
-* *public native int writeAudio(byte[] data, int offset, int length, int timestamp);*: Write aac frames with this function
-* *public native int close();*: Call this function to close the publishing.
-* *public native int isConnected();*: Call this function to query the connection status. Returns 1 if connected, returns 0 if not connected
+* *public native int open(String url, int width, int height);* : Call this function with the URL you plan to publish. Width and height are optional video parameters.
+* *public native int writeVideo(byte[] data, int offset, int length, int timestamp);*: Write h264 NAL units with this function.
+* *public native int writeAudio(byte[] data, int offset, int length, int timestamp);*: Write AAC frames with this function.
+* *public native int close();*: Call this function to close publishing.
+* *public native int isConnected();*: Call this function to query connection status.
 
-To save flv file locally as well, you can use below functions
-* *public native void file_open(String filename);* : call this function with full file path
-* *public native void write_flv_header(boolean is_have_audio, boolean is_have_video);*: After opening file call this function
-* *public native void file_close();*: Call this function to close the file. 
-
-if any local file is opened, library will write the audio and video frames to local file as well. 
-
-## Install ##
-
-- Add dependency to your build gradle
-```sh
-dependencies {
-    ...
-    compile 'net.butterflytv.utils:rtmp-client:3.1.0'
-    ...
-}
-```
-
-- That's all. You can use RtmpClient class
-
-
-<br/>
-
-[Ant Media](http://antmedia.io)
-
+To save FLV files locally as well:
+* *public native void file_open(String filename);*: Call with full file path.
+* *public native void write_flv_header(boolean is_have_audio, boolean is_have_video);*: After opening file, call this function.
+* *public native void file_close();*: Call to close the local file.
