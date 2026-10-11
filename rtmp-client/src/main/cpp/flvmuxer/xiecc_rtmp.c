@@ -6,6 +6,8 @@
 #include "xiecc_rtmp.h"
 #include <android/log.h>
 
+#include <string.h>
+
 #define AAC_ADTS_HEADER_SIZE 7
 #define FLV_TAG_HEAD_LEN 11
 #define FLV_PRE_TAG_LEN 4

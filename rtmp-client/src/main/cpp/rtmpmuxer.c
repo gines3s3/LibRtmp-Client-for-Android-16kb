@@ -1,5 +1,6 @@
 #include <jni.h>
-#include <malloc.h>
+#include <stdlib.h>
+#include <string.h>
 #include <rtmp.h>
 
 #include "flvmuxer/xiecc_rtmp.h"

@@ -1,4 +1,5 @@
-#include <malloc.h>
+#include <stdlib.h>
+#include <string.h>
 #include "librtmp-jni.h"
 #include "rtmp.h"
 #include <android/log.h>
